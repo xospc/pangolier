@@ -2,17 +2,17 @@ class FilterBase:
     def __init__(self, expression):
         self.expression = expression
 
-    def to_str(self):
+    def to_str(self, pretty=False):
         raise NotImplementedError
 
 
 class EqualFilter(FilterBase):
-    def to_str(self):
+    def to_str(self, pretty=False):
         return '="%s"' % self.expression
 
 
 class RegexpFilter(FilterBase):
-    def to_str(self):
+    def to_str(self, pretty=False):
         return '=~"%s"' % self.expression
 
 
