@@ -1,5 +1,4 @@
-from textwrap import indent
-
+from .common import indent_body
 from .filters import _make_filter
 
 
@@ -39,7 +38,7 @@ class FilteredMetric(MetricBase):
         if pretty:
             return '%s{\n%s\n}' % (
                 self.origin_metric.to_str(),
-                indent(',\n'.join(body_parts), ' ' * 4),
+                indent_body(',\n'.join(body_parts))
             )
 
         return '%s{%s}' % (
