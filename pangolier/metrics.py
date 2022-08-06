@@ -1,8 +1,10 @@
+from textwrap import indent
+
 from .filters import _make_filter
 
 
 class MetricBase:
-    def to_str(self):
+    def to_str(self, pretty=False):
         raise NotImplementedError
 
 
@@ -10,11 +12,10 @@ class Metric(MetricBase):
     def __init__(self, name):
         self.name = name
 
-    def to_str(self):
+    def to_str(self, pretty=False):
         return self.name
 
     def filter(self, **kwargs):
-
         return FilteredMetric(self, [
             (k, _make_filter(v))
             for k, v in kwargs.items()
@@ -26,13 +27,24 @@ class FilteredMetric(MetricBase):
         self.origin_metric = origin_metric
         self.filters = filters
 
-    def to_str(self):
+    def to_str(self, pretty=False):
+        if not self.filters:
+            return self.origin_metric.to_str(pretty=pretty)
+
+        body_parts = [
+            '%s%s' % (k, f.to_str(pretty=pretty))
+            for k, f in self.filters
+        ]
+
+        if pretty:
+            return '%s{\n%s\n}' % (
+                self.origin_metric.to_str(),
+                indent(',\n'.join(body_parts), ' ' * 4),
+            )
+
         return '%s{%s}' % (
             self.origin_metric.to_str(),
-            ', '.join([
-                '%s%s' % (k, f.to_str())
-                for k, f in self.filters
-            ])
+            ', '.join(body_parts)
         )
 
     def filter(self, **kwargs):
