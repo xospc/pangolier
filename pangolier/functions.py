@@ -1,9 +1,9 @@
 from .common import indent_body
+from .metrics import MetricBase
 
 
-class FunctionBase:
-    def to_str(self, pretty=False):
-        raise NotImplementedError
+class FunctionBase(MetricBase):
+    pass
 
 
 class Rate(FunctionBase):
