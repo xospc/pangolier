@@ -10,7 +10,7 @@ setup(
     python_requires='>3.10.0',
 
     url='https://github.com/lexdene/pangolier',
-    description="prometheus query builder",
+    description='prometheus query builder',
     long_description_content_type='text/markdown',
     long_description=long_description,
 )
