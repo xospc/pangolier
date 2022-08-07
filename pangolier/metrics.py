@@ -6,6 +6,9 @@ class MetricBase:
     def to_str(self, pretty=False):
         raise NotImplementedError
 
+    def __truediv__(self, other):
+        return BinOp('/', self, other)
+
 
 class Metric(MetricBase):
     def __init__(self, name):
@@ -55,4 +58,18 @@ class FilteredMetric(MetricBase):
         return FilteredMetric(
             self.origin_metric,
             self.filters + append_filters
+        )
+
+
+class BinOp(MetricBase):
+    def __init__(self, op, first, second):
+        self.op = op
+        self.first = first
+        self.second = second
+
+    def to_str(self, pretty=False):
+        return '%s %s %s' % (
+            self.first.to_str(pretty=pretty),
+            self.op,
+            self.second.to_str(pretty=pretty),
         )

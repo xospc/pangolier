@@ -155,3 +155,29 @@ class TestPretty(TestCase):
                 )
             '''
         )
+
+    def test_bin_op(self):
+        self._assert_pretty_equal(
+            Rate(
+                Metric('foo').filter(
+                    group='canary'
+                ),
+                timespan='5m'
+            ) / Rate(
+                Metric('bar').filter(
+                    group='canary'
+                ),
+                timespan='5m'
+            ),
+            '''
+                rate(
+                    foo{
+                        group="canary"
+                    }[5m]
+                ) / rate(
+                    bar{
+                        group="canary"
+                    }[5m]
+                )
+            '''
+        )
