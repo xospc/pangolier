@@ -52,3 +52,22 @@ class Sum(FunctionBase):
             )
 
         return 'sum(%s)' % body
+
+
+class HistogramQuantile(FunctionBase):
+    def __init__(self, quantile, origin_metric):
+        self.quantile = quantile
+        self.origin_metric = origin_metric
+
+    def to_str(self, pretty=False):
+        body = self.origin_metric.to_str(pretty=pretty)
+
+        if pretty:
+            return 'histogram_quantile(\n%s,\n%s\n)' % (
+                indent_body(str(self.quantile)),
+                indent_body(body),
+            )
+
+        return 'histogram_quantile(%s, %s)' % (
+            self.quantile, body
+        )
