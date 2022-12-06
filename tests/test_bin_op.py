@@ -11,6 +11,11 @@ class TestBinOp(TestCase):
             'foo / bar'
         )
 
+        self.assertEqual(
+            (Metric('foo') - Metric('bar') / Metric('biz')).to_str(),
+            'foo - bar / biz'
+        )
+
     def test_filters(self):
         self.assertEqual(
             (

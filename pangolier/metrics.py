@@ -6,6 +6,9 @@ class MetricBase:
     def to_str(self, pretty=False):
         raise NotImplementedError
 
+    def __sub__(self, other):
+        return BinOp('-', self, other)
+
     def __truediv__(self, other):
         return BinOp('/', self, other)
 
