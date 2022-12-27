@@ -55,6 +55,8 @@ class Sum(FunctionBase):
 
 
 class HistogramQuantile(FunctionBase):
+    # deprecated, will be removed soon.
+    # use `function` instead.
     def __init__(self, quantile, origin_metric):
         self.quantile = quantile
         self.origin_metric = origin_metric
@@ -71,3 +73,43 @@ class HistogramQuantile(FunctionBase):
         return 'histogram_quantile(%s, %s)' % (
             self.quantile, body
         )
+
+
+class SimpleFunction(FunctionBase):
+    name = 'unknown'
+
+    def __init__(self, *argv):
+        self.argv = argv
+
+    def _format_arg(self, arg, pretty=False):
+        if isinstance(arg, MetricBase):
+            return arg.to_str(pretty=pretty)
+
+        return str(arg)
+
+    def to_str(self, pretty=False):
+        formatted_argv = [
+            self._format_arg(arg, pretty=pretty)
+            for arg in self.argv
+        ]
+
+        if pretty:
+            return '%s(\n%s\n)' % (
+                self.name,
+                ',\n'.join([
+                    indent_body(arg)
+                    for arg in formatted_argv
+                ])
+            )
+
+        return '%s(%s)' % (
+            self.name, ', '.join(formatted_argv)
+        )
+
+
+def function(name):
+    return type(
+        'simple_function_%s' % name,
+        (SimpleFunction,),
+        {'name': name}
+    )

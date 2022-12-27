@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Rate, Sum, HistogramQuantile
+from pangolier.functions import Rate, Sum, HistogramQuantile, function
 
 
 class TestFunction(TestCase):
@@ -64,9 +64,26 @@ class TestFunction(TestCase):
             'sum by(group)(rate(http_requests_total{job="prometheus"}[5m]))'  # noqa
         )
 
-    def test_histogram_quantile(self):
+    def test_histogram_quantile_deprecated(self):
         self.assertEqual(
             HistogramQuantile(
+                0.9,
+                Sum(
+                    Rate(
+                        Metric('http_request_duration_seconds_bucket'),
+                        timespan='5m',
+                    ),
+                    by=('le',)
+                )
+            ).to_str(),
+            'histogram_quantile(0.9, sum by(le)(rate(http_request_duration_seconds_bucket[5m])))'  # noqa
+        )
+
+    def test_histogram_quantile(self):
+        histogram_quantile = function('histogram_quantile')
+
+        self.assertEqual(
+            histogram_quantile(
                 0.9,
                 Sum(
                     Rate(
