@@ -2,7 +2,7 @@ from textwrap import dedent
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Rate, Sum, HistogramQuantile
+from pangolier.functions import Rate, Sum, HistogramQuantile, function
 
 
 class TestPretty(TestCase):
@@ -130,9 +130,37 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_histogram_quantile(self):
+    def test_histogram_quantile_deprecated(self):
         self._assert_pretty_equal(
             HistogramQuantile(
+                0.9,
+                Sum(
+                    Rate(
+                        Metric('http_request_duration_seconds_bucket'),
+                        timespan='5m',
+                    ),
+                    by=('le',)
+                )
+            ),
+            '''
+                histogram_quantile(
+                    0.9,
+                    sum by(
+                        le
+                    )(
+                        rate(
+                            http_request_duration_seconds_bucket[5m]
+                        )
+                    )
+                )
+            '''
+        )
+
+    def test_histogram_quantile(self):
+        histogram_quantile = function('histogram_quantile')
+
+        self._assert_pretty_equal(
+            histogram_quantile(
                 0.9,
                 Sum(
                     Rate(

@@ -47,23 +47,13 @@ You can disable it as you like.
 
 ### functions
 
-Pangolier supports some prometheus functions, like `sum`, `rate` and `histogram_quantile`.
+Pangolier supports some prometheus functions, like `sum` and `rate`.
 
     from pangolier.metrics import Metric
-    from pangolier.functions import Rate, Sum, HistogramQuantile
+    from pangolier.functions import Rate, Sum
 
     print(Rate(Metric('http_requests_total'), timespan='5m').to_str(pretty=True))
     print(Sum(Metric('http_requests_total'), by=('job', 'group')).to_str(pretty=True))
-    print(HistogramQuantile(
-        0.9,
-        Sum(
-            Rate(
-                Metric('http_request_duration_seconds_bucket'),
-                timespan='5m',
-            ),
-            by=('le',)
-        )
-    ).to_str(pretty=True))
 
 output:
 
@@ -77,6 +67,25 @@ output:
             http_requests_total[5m]
         )
     )
+
+Also you can build functions by name. For example:
+
+    from pangolier.functions import function
+
+    histogram_quantile = function('histogram_quantile')
+    print(histogram_quantile(
+        0.9,
+        Sum(
+            Rate(
+                Metric('http_request_duration_seconds_bucket'),
+                timespan='5m',
+            ),
+            by=('le',)
+        )
+    ).to_str(pretty=True))
+
+output:
+
     histogram_quantile(
         0.9,
         sum by(
