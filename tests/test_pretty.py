@@ -2,7 +2,7 @@ from textwrap import dedent
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Rate, Sum, HistogramQuantile, function
+from pangolier.functions import Rate, Sum, function
 
 
 class TestPretty(TestCase):
@@ -131,6 +131,8 @@ class TestPretty(TestCase):
         )
 
     def test_histogram_quantile_deprecated(self):
+        from pangolier.functions import HistogramQuantile
+
         self._assert_pretty_equal(
             HistogramQuantile(
                 0.9,

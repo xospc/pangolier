@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Rate, Sum, HistogramQuantile, function
+from pangolier.functions import Rate, Sum, function
 
 
 class TestFunction(TestCase):
@@ -65,6 +65,8 @@ class TestFunction(TestCase):
         )
 
     def test_histogram_quantile_deprecated(self):
+        from pangolier.functions import HistogramQuantile
+
         self.assertEqual(
             HistogramQuantile(
                 0.9,
