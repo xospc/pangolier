@@ -6,25 +6,6 @@ class FunctionBase(MetricBase):
     pass
 
 
-class Rate(FunctionBase):
-    # Should I give timespan a default value.
-    # Maybe 5m?
-    def __init__(self, origin_metric, timespan):
-        self.origin_metric = origin_metric
-        self.timespan = timespan
-
-    def to_str(self, pretty=False):
-        body = self.origin_metric.to_str(pretty=pretty)
-
-        if pretty:
-            return 'rate(\n%s[%s]\n)' % (
-                indent_body(body),
-                self.timespan
-            )
-
-        return 'rate(%s[%s])' % (body, self.timespan)
-
-
 class Sum(FunctionBase):
     def __init__(self, origin_metric, by=None):
         self.origin_metric = origin_metric
@@ -97,5 +78,39 @@ def function(name):
     return type(
         'simple_function_%s' % name,
         (SimpleFunction,),
+        {'name': name}
+    )
+
+
+class RangeFunction(FunctionBase):
+    name = 'unknown'
+
+    def __init__(self, origin_metric, timespan):
+        self.origin_metric = origin_metric
+        self.timespan = timespan
+
+    def to_str(self, pretty=False):
+        body = self.origin_metric.to_str(pretty=pretty)
+
+        if pretty:
+            return '%s(\n%s[%s]\n)' % (
+                self.name,
+                indent_body(body),
+                self.timespan
+            )
+
+        return '%s(%s[%s])' % (self.name, body, self.timespan)
+
+
+class Rate(RangeFunction):
+    # deprecated, will be removed soon.
+    # use `range_function` instead.
+    name = 'rate'
+
+
+def range_function(name):
+    return type(
+        'range_function_%s' % name,
+        (RangeFunction,),
         {'name': name}
     )
