@@ -47,22 +47,7 @@ You can disable it as you like.
 
 ### functions
 
-Pangolier supports some prometheus functions, like `sum`.
-
-    from pangolier.metrics import Metric
-    from pangolier.functions import Sum
-
-    print(Sum(Metric('http_requests_total'), by=('job', 'group')).to_str(pretty=True))
-
-output:
-
-    sum by(
-        job, group
-    )(
-        http_requests_total
-    )
-
-Also you can build functions by name. For example:
+You can build prometheus functions by name. For example:
 
     from pangolier.functions import function
 
@@ -88,14 +73,33 @@ output:
         http_requests_total[5m]
     )
 
+`aggregation_operator` shoule be used for Aggregation operators:
+
+    from pangolier.functions import aggregation_operator
+
+    sum_ = aggregation_operator('sum')
+    print(sum_(
+        Metric('http_requests_total'),
+        by=('job', 'group'),
+    ).to_str(pretty=True))
+
+output:
+
+    sum by(
+        job, group
+    )(
+        http_requests_total
+    )
+
 combine them all together:
 
     histogram_quantile = function('histogram_quantile')
     rate = range_function('rate')
+    sum_ = aggregation_operator('sum')
 
     print(histogram_quantile(
         0.9,
-        Sum(
+        sum_(
             rate(
                 Metric('http_request_duration_seconds_bucket'),
                 timespan='5m',
@@ -116,8 +120,6 @@ output:
             )
         )
     )
-
-More functions will be added in future.
 
 ### bin op
 
