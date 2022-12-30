@@ -47,36 +47,56 @@ You can disable it as you like.
 
 ### functions
 
-Pangolier supports some prometheus functions, like `sum` and `rate`.
+Pangolier supports some prometheus functions, like `sum`.
 
     from pangolier.metrics import Metric
-    from pangolier.functions import Rate, Sum
+    from pangolier.functions import Sum
 
-    print(Rate(Metric('http_requests_total'), timespan='5m').to_str(pretty=True))
     print(Sum(Metric('http_requests_total'), by=('job', 'group')).to_str(pretty=True))
 
 output:
 
-    rate(
-        http_requests_total[5m]
-    )
     sum by(
         job, group
     )(
-        rate(
-            http_requests_total[5m]
-        )
+        http_requests_total
     )
 
 Also you can build functions by name. For example:
 
     from pangolier.functions import function
 
+    abs = function('abs')
+    print(abs(Metric('http_requests_total')).to_str(pretty=True))
+
+output:
+
+    abs(
+        http_requests_total
+    )
+
+`range_function` should be used for functions accept a `range-vector`.
+
+    from pangolier.functions import range_function
+
+    rate = range_function('rate')
+    print(rate(Metric('http_requests_total'), timespan='5m').to_str(pretty=True))
+
+output:
+
+    rate(
+        http_requests_total[5m]
+    )
+
+combine them all together:
+
     histogram_quantile = function('histogram_quantile')
+    rate = range_function('rate')
+
     print(histogram_quantile(
         0.9,
         Sum(
-            Rate(
+            rate(
                 Metric('http_request_duration_seconds_bucket'),
                 timespan='5m',
             ),
@@ -104,15 +124,16 @@ More functions will be added in future.
 divide one metric with another:
 
     from pangolier.metrics import Metric
-    from pangolier.functions import Rate
+    from pangolier.functions import range_function
 
+    rate = range_function('rate')
     print((
-        Rate(
+        rate(
             Metric('foo').filter(
                 group='canary'
             ),
             timespan='5m'
-        ) / Rate(
+        ) / rate(
             Metric('bar').filter(
                 group='canary'
             ),

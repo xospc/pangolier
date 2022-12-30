@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Rate
+from pangolier.functions import range_function
 
 
 class TestBinOp(TestCase):
@@ -29,14 +29,16 @@ class TestBinOp(TestCase):
         )
 
     def test_functions(self):
+        rate = range_function('rate')
+
         self.assertEqual(
             (
-                Rate(
+                rate(
                     Metric('foo').filter(
                         group='canary'
                     ),
                     timespan='5m'
-                ) / Rate(
+                ) / rate(
                     Metric('bar').filter(
                         group='canary'
                     ),

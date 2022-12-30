@@ -2,7 +2,7 @@ from textwrap import dedent
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Rate, Sum, function
+from pangolier.functions import Sum, function, range_function
 
 
 class TestPretty(TestCase):
@@ -32,7 +32,9 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_rate(self):
+    def test_rate_deprecated(self):
+        from pangolier.functions import Rate
+
         self._assert_pretty_equal(
             Rate(Metric('http_requests_total'), timespan='5m'),
             '''
@@ -42,9 +44,35 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_rate_with_filter(self):
+    def test_rate(self):
+        rate = range_function('rate')
+
         self._assert_pretty_equal(
-            Rate(
+            rate(Metric('http_requests_total'), timespan='5m'),
+            '''
+                rate(
+                    http_requests_total[5m]
+                )
+            '''
+        )
+
+    def test_increase(self):
+        increase = range_function('increase')
+
+        self._assert_pretty_equal(
+            increase(Metric('http_requests_total'), timespan='5m'),
+            '''
+                increase(
+                    http_requests_total[5m]
+                )
+            '''
+        )
+
+    def test_rate_with_filter(self):
+        rate = range_function('rate')
+
+        self._assert_pretty_equal(
+            rate(
                 Metric('http_requests_total').filter(
                     job='prometheus',
                     group='canary'
@@ -87,9 +115,11 @@ class TestPretty(TestCase):
         )
 
     def test_sum_by_rate(self):
+        rate = range_function('rate')
+
         self._assert_pretty_equal(
             Sum(
-                Rate(
+                rate(
                     Metric('http_requests_total'),
                     timespan='5m'
                 ),
@@ -107,9 +137,11 @@ class TestPretty(TestCase):
         )
 
     def test_sum_by_rate_with_filter(self):
+        rate = range_function('rate')
+
         self._assert_pretty_equal(
             Sum(
-                Rate(
+                rate(
                     Metric('http_requests_total').filter(
                         job='prometheus',
                     ),
@@ -133,11 +165,13 @@ class TestPretty(TestCase):
     def test_histogram_quantile_deprecated(self):
         from pangolier.functions import HistogramQuantile
 
+        rate = range_function('rate')
+
         self._assert_pretty_equal(
             HistogramQuantile(
                 0.9,
                 Sum(
-                    Rate(
+                    rate(
                         Metric('http_request_duration_seconds_bucket'),
                         timespan='5m',
                     ),
@@ -160,12 +194,13 @@ class TestPretty(TestCase):
 
     def test_histogram_quantile(self):
         histogram_quantile = function('histogram_quantile')
+        rate = range_function('rate')
 
         self._assert_pretty_equal(
             histogram_quantile(
                 0.9,
                 Sum(
-                    Rate(
+                    rate(
                         Metric('http_request_duration_seconds_bucket'),
                         timespan='5m',
                     ),
@@ -187,13 +222,15 @@ class TestPretty(TestCase):
         )
 
     def test_bin_op(self):
+        rate = range_function('rate')
+
         self._assert_pretty_equal(
-            Rate(
+            rate(
                 Metric('foo').filter(
                     group='canary'
                 ),
                 timespan='5m'
-            ) / Rate(
+            ) / rate(
                 Metric('bar').filter(
                     group='canary'
                 ),
