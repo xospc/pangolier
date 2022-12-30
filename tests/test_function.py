@@ -1,7 +1,9 @@
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.functions import Sum, function, range_function
+from pangolier.functions import (
+    function, range_function, aggregation_operator as aggr,
+)
 
 
 class TestFunction(TestCase):
@@ -43,26 +45,50 @@ class TestFunction(TestCase):
             'rate(http_requests_total{job="prometheus", group="canary"}[5m])'
         )
 
-    def test_sum(self):
+    def test_sum_deprecated(self):
+        from pangolier.functions import Sum
+
         self.assertEqual(
             Sum(Metric('http_requests_total')).to_str(),
             'sum(http_requests_total)'
         )
 
-    def test_sum_by(self):
+    def test_sum(self):
+        sum_ = aggr('sum')
+
         self.assertEqual(
-            Sum(
+            sum_(Metric('http_requests_total')).to_str(),
+            'sum(http_requests_total)'
+        )
+
+    def test_sum_by(self):
+        sum_ = aggr('sum')
+
+        self.assertEqual(
+            sum_(
                 Metric('http_requests_total'),
                 by=('job', 'group'),
             ).to_str(),
             'sum by(job, group)(http_requests_total)'
         )
 
-    def test_sum_by_rate(self):
-        rate = range_function('rate')
+    def test_avg_without(self):
+        avg = aggr('avg')
 
         self.assertEqual(
-            Sum(
+            avg(
+                Metric('http_requests_total'),
+                without=('job', 'group'),
+            ).to_str(),
+            'avg without(job, group)(http_requests_total)'
+        )
+
+    def test_sum_by_rate(self):
+        rate = range_function('rate')
+        sum_ = aggr('sum')
+
+        self.assertEqual(
+            sum_(
                 rate(
                     Metric('http_requests_total'),
                     timespan='5m'
@@ -74,9 +100,10 @@ class TestFunction(TestCase):
 
     def test_sum_by_rate_with_filter(self):
         rate = range_function('rate')
+        sum_ = aggr('sum')
 
         self.assertEqual(
-            Sum(
+            sum_(
                 rate(
                     Metric('http_requests_total').filter(
                         job='prometheus',
@@ -92,11 +119,12 @@ class TestFunction(TestCase):
         from pangolier.functions import HistogramQuantile
 
         rate = range_function('rate')
+        sum_ = aggr('sum')
 
         self.assertEqual(
             HistogramQuantile(
                 0.9,
-                Sum(
+                sum_(
                     rate(
                         Metric('http_request_duration_seconds_bucket'),
                         timespan='5m',
@@ -110,11 +138,12 @@ class TestFunction(TestCase):
     def test_histogram_quantile(self):
         histogram_quantile = function('histogram_quantile')
         rate = range_function('rate')
+        sum_ = aggr('sum')
 
         self.assertEqual(
             histogram_quantile(
                 0.9,
-                Sum(
+                sum_(
                     rate(
                         Metric('http_request_duration_seconds_bucket'),
                         timespan='5m',

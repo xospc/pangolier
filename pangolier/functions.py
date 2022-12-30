@@ -6,35 +6,6 @@ class FunctionBase(MetricBase):
     pass
 
 
-class Sum(FunctionBase):
-    def __init__(self, origin_metric, by=None):
-        self.origin_metric = origin_metric
-        self.by = by
-
-    def to_str(self, pretty=False):
-        body = self.origin_metric.to_str(pretty=pretty)
-
-        if self.by:
-            by_str = ', '.join(self.by)
-
-            if pretty:
-                return 'sum by(\n%s\n)(\n%s\n)' % (
-                    indent_body(by_str),
-                    indent_body(body)
-                )
-            return 'sum by(%s)(%s)' % (
-                by_str,
-                body
-            )
-
-        if pretty:
-            return 'sum(\n%s\n)' % (
-                indent_body(body),
-            )
-
-        return 'sum(%s)' % body
-
-
 def _format_arg(arg, pretty=False):
     if isinstance(arg, MetricBase):
         return arg.to_str(pretty=pretty)
@@ -112,5 +83,69 @@ def range_function(name):
     return type(
         'range_function_%s' % name,
         (RangeFunction,),
+        {'name': name}
+    )
+
+
+class AggregationOperator(FunctionBase):
+    name = 'unknown'
+
+    def __init__(self, *argv, **kwargs):
+        self.argv = argv
+
+        if len(kwargs) > 1:
+            raise ValueError('too many kwargs: %s' % kwargs)
+
+        self.kwargs = kwargs
+
+    def _make_clause(self, pretty=False):
+        if self.kwargs:
+            key, value = next(iter(self.kwargs.items()))
+
+            body = ', '.join(value)
+
+            if pretty:
+                return ' %s(\n%s\n)' % (
+                    key,
+                    indent_body(body)
+                )
+
+            return ' %s(%s)' % (key, body)
+
+        return ''
+
+    def to_str(self, pretty=False):
+        clause = self._make_clause(pretty=pretty)
+
+        formatted_argv = [
+            _format_arg(arg, pretty=pretty)
+            for arg in self.argv
+        ]
+
+        if pretty:
+            return '%s%s(\n%s\n)' % (
+                self.name,
+                clause,
+                ',\n'.join([
+                    indent_body(arg)
+                    for arg in formatted_argv
+                ])
+            )
+
+        return '%s%s(%s)' % (
+            self.name, clause, ', '.join(formatted_argv)
+        )
+
+
+class Sum(AggregationOperator):
+    # deprecated, will be removed soon.
+    # use `aggregation_operator` instead.
+    name = 'sum'
+
+
+def aggregation_operator(name):
+    return type(
+        'aggregation_operator_%s' % name,
+        (AggregationOperator,),
         {'name': name}
     )
