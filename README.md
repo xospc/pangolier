@@ -8,7 +8,7 @@ prometheus query builder
 
 ## usage
 
-### simple case:
+### simple case
 
 For a metric with filters:
 
@@ -43,11 +43,9 @@ output:
 
 I will always use `pretty=True` in rest of this document.
 
-You can disable it as you like.
-
 ### functions
 
-You can build prometheus functions by name. For example:
+Prometheus functions can be built by name. For example:
 
     from pangolier.functions import function
 
@@ -73,7 +71,7 @@ output:
         http_requests_total[5m]
     )
 
-`aggregation_operator` shoule be used for Aggregation operators:
+`aggregation_operator` shoule be used for aggregation operators:
 
     from pangolier.functions import aggregation_operator
 
@@ -121,9 +119,18 @@ output:
         )
     )
 
-### bin op
+### binary operators
 
-divide one metric with another:
+support following binary operators:
+
+* `+` (addition)
+* `-` (subtraction)
+* `*` (multiplication)
+* `/` (division)
+* `%` (modulo)
+* `^` (power/exponentiation)
+
+For example, divide one metric with another:
 
     from pangolier.metrics import Metric
     from pangolier.functions import range_function
@@ -154,8 +161,6 @@ output:
             group="canary"
         }[5m]
     )
-
-More operations will be added in future.
 
 ## about name
 

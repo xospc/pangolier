@@ -5,14 +5,51 @@ from pangolier.functions import range_function
 
 
 class TestBinOp(TestCase):
-    def test_metrics(self):
+    def _assert_metric_str(self, metric, query):
         self.assertEqual(
-            (Metric('foo') / Metric('bar')).to_str(),
+            metric.to_str(),
+            query
+        )
+
+    def test_addition(self):
+        self._assert_metric_str(
+            Metric('foo') + Metric('bar'),
+            'foo + bar'
+        )
+
+    def test_subtraction(self):
+        self._assert_metric_str(
+            Metric('foo') - Metric('bar'),
+            'foo - bar'
+        )
+
+    def test_multiplication(self):
+        self._assert_metric_str(
+            Metric('foo') * Metric('bar'),
+            'foo * bar'
+        )
+
+    def test_division(self):
+        self._assert_metric_str(
+            Metric('foo') / Metric('bar'),
             'foo / bar'
         )
 
-        self.assertEqual(
-            (Metric('foo') - Metric('bar') / Metric('biz')).to_str(),
+    def test_modulo(self):
+        self._assert_metric_str(
+            Metric('foo') % Metric('bar'),
+            'foo % bar'
+        )
+
+    def test_exponentiation(self):
+        self._assert_metric_str(
+            Metric('foo') ^ Metric('bar'),
+            'foo ^ bar'
+        )
+
+    def test_metrics(self):
+        self._assert_metric_str(
+            Metric('foo') - Metric('bar') / Metric('biz'),
             'foo - bar / biz'
         )
 
