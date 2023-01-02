@@ -6,11 +6,23 @@ class MetricBase:
     def to_str(self, pretty=False):
         raise NotImplementedError
 
+    def __add__(self, other):
+        return BinOp('+', self, other)
+
     def __sub__(self, other):
         return BinOp('-', self, other)
 
+    def __mul__(self, other):
+        return BinOp('*', self, other)
+
     def __truediv__(self, other):
         return BinOp('/', self, other)
+
+    def __mod__(self, other):
+        return BinOp('%', self, other)
+
+    def __xor__(self, other):
+        return BinOp('^', self, other)
 
 
 class Metric(MetricBase):
