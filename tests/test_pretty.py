@@ -34,18 +34,6 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_rate_deprecated(self):
-        from pangolier.functions import Rate
-
-        self._assert_pretty_equal(
-            Rate(Metric('http_requests_total'), timespan='5m'),
-            '''
-                rate(
-                    http_requests_total[5m]
-                )
-            '''
-        )
-
     def test_rate(self):
         rate = range_function('rate')
 
@@ -87,18 +75,6 @@ class TestPretty(TestCase):
                         job="prometheus",
                         group="canary"
                     }[5m]
-                )
-            '''
-        )
-
-    def test_sum_deprecated(self):
-        from pangolier.functions import Sum
-
-        self._assert_pretty_equal(
-            Sum(Metric('http_requests_total')),
-            '''
-                sum(
-                    http_requests_total
                 )
             '''
         )
@@ -194,37 +170,6 @@ class TestPretty(TestCase):
                         http_requests_total{
                             job="prometheus"
                         }[5m]
-                    )
-                )
-            '''
-        )
-
-    def test_histogram_quantile_deprecated(self):
-        from pangolier.functions import HistogramQuantile
-
-        rate = range_function('rate')
-        sum_ = aggr('sum')
-
-        self._assert_pretty_equal(
-            HistogramQuantile(
-                0.9,
-                sum_(
-                    rate(
-                        Metric('http_request_duration_seconds_bucket'),
-                        timespan='5m',
-                    ),
-                    by=('le',)
-                )
-            ),
-            '''
-                histogram_quantile(
-                    0.9,
-                    sum by(
-                        le
-                    )(
-                        rate(
-                            http_request_duration_seconds_bucket[5m]
-                        )
                     )
                 )
             '''
