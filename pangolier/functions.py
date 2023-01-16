@@ -39,12 +39,6 @@ class SimpleFunction(FunctionBase):
         )
 
 
-class HistogramQuantile(SimpleFunction):
-    # deprecated, will be removed soon.
-    # use `function` instead.
-    name = 'histogram_quantile'
-
-
 def function(name):
     return type(
         'simple_function_%s' % name,
@@ -71,12 +65,6 @@ class RangeFunction(FunctionBase):
             )
 
         return '%s(%s[%s])' % (self.name, body, self.timespan)
-
-
-class Rate(RangeFunction):
-    # deprecated, will be removed soon.
-    # use `range_function` instead.
-    name = 'rate'
 
 
 def range_function(name):
@@ -135,12 +123,6 @@ class AggregationOperator(FunctionBase):
         return '%s%s(%s)' % (
             self.name, clause, ', '.join(formatted_argv)
         )
-
-
-class Sum(AggregationOperator):
-    # deprecated, will be removed soon.
-    # use `aggregation_operator` instead.
-    name = 'sum'
 
 
 def aggregation_operator(name):
