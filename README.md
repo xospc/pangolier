@@ -162,6 +162,27 @@ output:
         }[5m]
     )
 
+For operation with modifier:
+
+    from pangolier.metrics import Metric, BinOp, GroupLeft
+
+    print(BinOp(
+        '*',
+        Metric('foo'),
+        Metric('bar'),
+        on=('interface', 'job'),
+        group=GroupLeft('node', 'resource'),
+    ).to_str(pretty=True))
+
+output:
+
+    foo * on(
+        interface, job
+    ) group_left(
+        node, resource
+    ) bar
+
+
 ## about name
 
 [Pangolier](https://dota2.fandom.com/wiki/Pangolier)
