@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pangolier.metrics import Metric
+from pangolier.metrics import Metric, BinOp, GroupLeft, GroupRight
 from pangolier.functions import range_function
 
 
@@ -83,4 +83,78 @@ class TestBinOp(TestCase):
                 )
             ).to_str(),
             'rate(foo{group="canary"}[5m]) / rate(bar{group="canary"}[5m])'
+        )
+
+    def test_on(self):
+        self._assert_metric_str(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface',)
+            ),
+            'foo * on(interface) bar',
+        )
+
+        self._assert_metric_str(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface', 'job')
+            ),
+            'foo * on(interface, job) bar',
+        )
+
+    def test_ignoring(self):
+        self._assert_metric_str(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                ignoring=('interface', 'job')
+            ),
+            'foo * ignoring(interface, job) bar',
+        )
+
+        with self.assertRaises(ValueError):
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface',),
+                ignoring=('job',)
+            )
+
+    def test_group(self):
+        self._assert_metric_str(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                group=GroupLeft(),
+            ),
+            'foo * group_left bar',
+        )
+
+        self._assert_metric_str(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface', 'job'),
+                group=GroupRight(),
+            ),
+            'foo * on(interface, job) group_right bar',
+        )
+
+        self._assert_metric_str(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface', 'job'),
+                group=GroupLeft('node', 'resource'),
+            ),
+            'foo * on(interface, job) group_left(node, resource) bar',
         )

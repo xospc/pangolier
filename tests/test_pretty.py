@@ -1,7 +1,7 @@
 from textwrap import dedent
 from unittest import TestCase
 
-from pangolier.metrics import Metric
+from pangolier.metrics import Metric, BinOp, GroupLeft
 from pangolier.functions import (
     function, range_function, aggregation_operator as aggr,
 )
@@ -231,4 +231,37 @@ class TestPretty(TestCase):
                     }[5m]
                 )
             '''
+        )
+
+    def test_bin_op_with_on_group(self):
+        self._assert_pretty_equal(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface', 'job'),
+                group=GroupLeft(),
+            ),
+            '''
+                foo * on(
+                    interface, job
+                ) group_left bar
+            ''',
+        )
+
+        self._assert_pretty_equal(
+            BinOp(
+                '*',
+                Metric('foo'),
+                Metric('bar'),
+                on=('interface', 'job'),
+                group=GroupLeft('node', 'resource'),
+            ),
+            '''
+                foo * on(
+                    interface, job
+                ) group_left(
+                    node, resource
+                ) bar
+            ''',
         )

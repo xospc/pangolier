@@ -1,4 +1,4 @@
-from .common import indent_body
+from .common import indent_body, format_modifier
 from .filters import _make_filter
 
 
@@ -76,15 +76,59 @@ class FilteredMetric(MetricBase):
         )
 
 
+class GroupBase(MetricBase):
+    modifier = ''
+
+    def __init__(self, *labels):
+        self.labels = labels
+
+    def to_str(self, pretty=False):
+        return format_modifier(self.modifier, self.labels, pretty=pretty)
+
+
+class GroupLeft(GroupBase):
+    modifier = 'group_left'
+
+
+class GroupRight(GroupBase):
+    modifier = 'group_right'
+
+
 class BinOp(MetricBase):
-    def __init__(self, op, first, second):
+    def __init__(
+        self, op, first, second,
+        *, on=None, ignoring=None, group=None,
+    ):
+        if on and ignoring:
+            raise ValueError('can not specific both `on` and `ignoring`')
+
         self.op = op
         self.first = first
         self.second = second
 
+        self.on = on
+        self.ignoring = ignoring
+        self.group = group
+
     def to_str(self, pretty=False):
-        return '%s %s %s' % (
-            self.first.to_str(pretty=pretty),
-            self.op,
-            self.second.to_str(pretty=pretty),
-        )
+        parts = []
+
+        parts.append(self.first.to_str(pretty=pretty))
+        parts.append(self.op)
+
+        if self.on:
+            parts.append(
+                format_modifier('on', self.on, pretty=pretty)
+            )
+
+        if self.ignoring:
+            parts.append(
+                format_modifier('ignoring', self.ignoring, pretty=pretty)
+            )
+
+        if self.group:
+            parts.append(self.group.to_str(pretty=pretty))
+
+        parts.append(self.second.to_str(pretty=pretty))
+
+        return ' '.join(parts)
