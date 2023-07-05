@@ -11,6 +11,10 @@ class EqualFilter(FilterBase):
         return '="%s"' % self.expression
 
 
+class NotEqualFilter(FilterBase):
+    def to_str(self, pretty=False):
+        return '!="%s"' % self.expression
+
 class RegexpFilter(FilterBase):
     def to_str(self, pretty=False):
         return '=~"%s"' % self.expression

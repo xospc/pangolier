@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from pangolier.metrics import Metric
-from pangolier.filters import RegexpFilter
+from pangolier.filters import NotEqualFilter, RegexpFilter
 
 
 class TestFilter(TestCase):
@@ -50,4 +50,12 @@ class TestFilter(TestCase):
                 job=RegexpFilter('prometheus-.*'),
             ).to_str(),
             'http_requests_total{job=~"prometheus-.*"}'
+        )
+
+    def test_not_equal_filter(self):
+        self.assertEqual(
+            Metric('http_requests_total').filter(
+                job=NotEqualFilter(''),
+            ).to_str(),
+            'http_requests_total{job!=""}'
         )
