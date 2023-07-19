@@ -1,26 +1,26 @@
 from textwrap import dedent
 from unittest import TestCase
 
-from pangolier.metrics import Metric, BinOp, GroupLeft
+from pangolier.metrics import MetricBase, Metric, BinOp, GroupLeft
 from pangolier.functions import (
     function, range_function, aggregation_operator as aggr,
 )
 
 
 class TestPretty(TestCase):
-    def _assert_pretty_equal(self, metric, query):
+    def _assert_pretty_equal(self, metric: MetricBase, query: str) -> None:
         self.assertEqual(
             metric.to_str(pretty=True),
             dedent(query).strip(),
         )
 
-    def test_simple_metric(self):
+    def test_simple_metric(self) -> None:
         self._assert_pretty_equal(
             Metric('http_requests_total'),
             'http_requests_total',
         )
 
-    def test_metric_with_filters(self):
+    def test_metric_with_filters(self) -> None:
         self._assert_pretty_equal(
             Metric('http_requests_total').filter(
                 job='prometheus',
@@ -34,7 +34,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_rate(self):
+    def test_rate(self) -> None:
         rate = range_function('rate')
 
         self._assert_pretty_equal(
@@ -46,7 +46,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_increase(self):
+    def test_increase(self) -> None:
         increase = range_function('increase')
 
         self._assert_pretty_equal(
@@ -58,7 +58,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_rate_with_filter(self):
+    def test_rate_with_filter(self) -> None:
         rate = range_function('rate')
 
         self._assert_pretty_equal(
@@ -79,7 +79,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_sum(self):
+    def test_sum(self) -> None:
         sum_ = aggr('sum')
 
         self._assert_pretty_equal(
@@ -91,13 +91,13 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_sum_by(self):
+    def test_sum_by(self) -> None:
         sum_ = aggr('sum')
 
         self._assert_pretty_equal(
             sum_(
                 Metric('http_requests_total'),
-                by=('job', 'group'),
+                by=['job', 'group'],
             ),
             '''
                 sum by(
@@ -108,13 +108,13 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_avg_without(self):
+    def test_avg_without(self) -> None:
         avg = aggr('avg')
 
         self._assert_pretty_equal(
             avg(
                 Metric('http_requests_total'),
-                without=('job', 'group'),
+                without=['job', 'group'],
             ),
             '''
                 avg without(
@@ -125,7 +125,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_sum_by_rate(self):
+    def test_sum_by_rate(self) -> None:
         rate = range_function('rate')
         sum_ = aggr('sum')
 
@@ -135,7 +135,7 @@ class TestPretty(TestCase):
                     Metric('http_requests_total'),
                     timespan='5m'
                 ),
-                by=('job', 'group'),
+                by=['job', 'group'],
             ),
             '''
                 sum by(
@@ -148,7 +148,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_sum_by_rate_with_filter(self):
+    def test_sum_by_rate_with_filter(self) -> None:
         rate = range_function('rate')
         sum_ = aggr('sum')
 
@@ -160,7 +160,7 @@ class TestPretty(TestCase):
                     ),
                     timespan='5m'
                 ),
-                by=('group',)
+                by=['group']
             ),
             '''
                 sum by(
@@ -175,7 +175,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_histogram_quantile(self):
+    def test_histogram_quantile(self) -> None:
         histogram_quantile = function('histogram_quantile')
         rate = range_function('rate')
         sum_ = aggr('sum')
@@ -188,7 +188,7 @@ class TestPretty(TestCase):
                         Metric('http_request_duration_seconds_bucket'),
                         timespan='5m',
                     ),
-                    by=('le',)
+                    by=['le']
                 )
             ),
             '''
@@ -205,7 +205,7 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_bin_op(self):
+    def test_bin_op(self) -> None:
         rate = range_function('rate')
 
         self._assert_pretty_equal(
@@ -233,13 +233,13 @@ class TestPretty(TestCase):
             '''
         )
 
-    def test_bin_op_with_on_group(self):
+    def test_bin_op_with_on_group(self) -> None:
         self._assert_pretty_equal(
             BinOp(
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface', 'job'),
+                on=['interface', 'job'],
                 group=GroupLeft(),
             ),
             '''
@@ -254,7 +254,7 @@ class TestPretty(TestCase):
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface', 'job'),
+                on=['interface', 'job'],
                 group=GroupLeft('node', 'resource'),
             ),
             '''

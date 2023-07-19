@@ -1,59 +1,59 @@
 from unittest import TestCase
 
-from pangolier.metrics import Metric, BinOp, GroupLeft, GroupRight
+from pangolier.metrics import MetricBase, Metric, BinOp, GroupLeft, GroupRight
 from pangolier.functions import range_function
 
 
 class TestBinOp(TestCase):
-    def _assert_metric_str(self, metric, query):
+    def _assert_metric_str(self, metric: MetricBase, query: str) -> None:
         self.assertEqual(
             metric.to_str(),
             query
         )
 
-    def test_addition(self):
+    def test_addition(self) -> None:
         self._assert_metric_str(
             Metric('foo') + Metric('bar'),
             'foo + bar'
         )
 
-    def test_subtraction(self):
+    def test_subtraction(self) -> None:
         self._assert_metric_str(
             Metric('foo') - Metric('bar'),
             'foo - bar'
         )
 
-    def test_multiplication(self):
+    def test_multiplication(self) -> None:
         self._assert_metric_str(
             Metric('foo') * Metric('bar'),
             'foo * bar'
         )
 
-    def test_division(self):
+    def test_division(self) -> None:
         self._assert_metric_str(
             Metric('foo') / Metric('bar'),
             'foo / bar'
         )
 
-    def test_modulo(self):
+    def test_modulo(self) -> None:
         self._assert_metric_str(
             Metric('foo') % Metric('bar'),
             'foo % bar'
         )
 
-    def test_exponentiation(self):
+    def test_exponentiation(self) -> None:
         self._assert_metric_str(
             Metric('foo') ^ Metric('bar'),
             'foo ^ bar'
         )
 
-    def test_metrics(self):
+    def test_metrics(self) -> None:
         self._assert_metric_str(
             Metric('foo') - Metric('bar') / Metric('biz'),
             'foo - bar / biz'
         )
 
-    def test_filters(self):
+    def test_filters(self) -> None:
         self.assertEqual(
             (
                 Metric('foo').filter(
@@ -65,7 +65,7 @@ class TestBinOp(TestCase):
             'foo{group="canary"} / bar{group="canary"}'
         )
 
-    def test_functions(self):
+    def test_functions(self) -> None:
         rate = range_function('rate')
 
         self.assertEqual(
@@ -85,13 +85,13 @@ class TestBinOp(TestCase):
             'rate(foo{group="canary"}[5m]) / rate(bar{group="canary"}[5m])'
         )
 
-    def test_on(self):
+    def test_on(self) -> None:
         self._assert_metric_str(
             BinOp(
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface',)
+                on=['interface']
             ),
             'foo * on(interface) bar',
         )
@@ -101,18 +101,18 @@ class TestBinOp(TestCase):
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface', 'job')
+                on=['interface', 'job']
             ),
             'foo * on(interface, job) bar',
         )
 
-    def test_ignoring(self):
+    def test_ignoring(self) -> None:
         self._assert_metric_str(
             BinOp(
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                ignoring=('interface', 'job')
+                ignoring=['interface', 'job']
             ),
             'foo * ignoring(interface, job) bar',
         )
@@ -122,11 +122,11 @@ class TestBinOp(TestCase):
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface',),
-                ignoring=('job',)
+                on=['interface'],
+                ignoring=['job']
             )
 
-    def test_group(self):
+    def test_group(self) -> None:
         self._assert_metric_str(
             BinOp(
                 '*',
@@ -142,7 +142,7 @@ class TestBinOp(TestCase):
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface', 'job'),
+                on=['interface', 'job'],
                 group=GroupRight(),
             ),
             'foo * on(interface, job) group_right bar',
@@ -153,7 +153,7 @@ class TestBinOp(TestCase):
                 '*',
                 Metric('foo'),
                 Metric('bar'),
-                on=('interface', 'job'),
+                on=['interface', 'job'],
                 group=GroupLeft('node', 'resource'),
             ),
             'foo * on(interface, job) group_left(node, resource) bar',

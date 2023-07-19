@@ -78,7 +78,7 @@ output:
     sum_ = aggregation_operator('sum')
     print(sum_(
         Metric('http_requests_total'),
-        by=('job', 'group'),
+        by=['job', 'group'],
     ).to_str(pretty=True))
 
 output:
@@ -102,7 +102,7 @@ combine them all together:
                 Metric('http_request_duration_seconds_bucket'),
                 timespan='5m',
             ),
-            by=('le',)
+            by=['le']
         )
     ).to_str(pretty=True))
 
@@ -170,7 +170,7 @@ For operation with modifier:
         '*',
         Metric('foo'),
         Metric('bar'),
-        on=('interface', 'job'),
+        on=['interface', 'job'],
         group=GroupLeft('node', 'resource'),
     ).to_str(pretty=True))
 

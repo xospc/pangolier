@@ -1,12 +1,16 @@
+from typing import Union
+
 from .common import indent_body
 from .metrics import MetricBase
+
+ArgType = Union[int, float, str, MetricBase]
 
 
 class FunctionBase(MetricBase):
     pass
 
 
-def _format_arg(arg, pretty=False):
+def _format_arg(arg: ArgType, pretty: bool = False) -> str:
     if isinstance(arg, MetricBase):
         return arg.to_str(pretty=pretty)
 
@@ -14,12 +18,14 @@ def _format_arg(arg, pretty=False):
 
 
 class SimpleFunction(FunctionBase):
+    argv: list[ArgType]
+
     name = 'unknown'
 
-    def __init__(self, *argv):
-        self.argv = argv
+    def __init__(self, *argv: ArgType):
+        self.argv = list(argv)
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         formatted_argv = [
             _format_arg(arg, pretty=pretty)
             for arg in self.argv
@@ -39,7 +45,7 @@ class SimpleFunction(FunctionBase):
         )
 
 
-def function(name):
+def function(name: str) -> type[SimpleFunction]:
     return type(
         'simple_function_%s' % name,
         (SimpleFunction,),
@@ -48,13 +54,16 @@ def function(name):
 
 
 class RangeFunction(FunctionBase):
+    origin_metric: MetricBase
+    timespan: str
+
     name = 'unknown'
 
-    def __init__(self, origin_metric, timespan):
+    def __init__(self, origin_metric: MetricBase, timespan: str):
         self.origin_metric = origin_metric
         self.timespan = timespan
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         body = self.origin_metric.to_str(pretty=pretty)
 
         if pretty:
@@ -67,7 +76,7 @@ class RangeFunction(FunctionBase):
         return '%s(%s[%s])' % (self.name, body, self.timespan)
 
 
-def range_function(name):
+def range_function(name: str) -> type[RangeFunction]:
     return type(
         'range_function_%s' % name,
         (RangeFunction,),
@@ -76,17 +85,20 @@ def range_function(name):
 
 
 class AggregationOperator(FunctionBase):
+    argv: list[ArgType]
+    kwargs: dict[str, list[str]]
+
     name = 'unknown'
 
-    def __init__(self, *argv, **kwargs):
-        self.argv = argv
+    def __init__(self, *argv: ArgType, **kwargs: list[str]):
+        self.argv = list(argv)
 
         if len(kwargs) > 1:
             raise ValueError('too many kwargs: %s' % kwargs)
 
         self.kwargs = kwargs
 
-    def _make_clause(self, pretty=False):
+    def _make_clause(self, pretty: bool = False) -> str:
         if self.kwargs:
             key, value = next(iter(self.kwargs.items()))
 
@@ -102,7 +114,7 @@ class AggregationOperator(FunctionBase):
 
         return ''
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         clause = self._make_clause(pretty=pretty)
 
         formatted_argv = [
@@ -125,7 +137,7 @@ class AggregationOperator(FunctionBase):
         )
 
 
-def aggregation_operator(name):
+def aggregation_operator(name: str) -> type[AggregationOperator]:
     return type(
         'aggregation_operator_%s' % name,
         (AggregationOperator,),

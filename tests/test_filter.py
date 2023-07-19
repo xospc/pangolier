@@ -5,7 +5,7 @@ from pangolier.filters import NotEqualFilter, RegexpFilter
 
 
 class TestFilter(TestCase):
-    def test_simple_filter(self):
+    def test_simple_filter(self) -> None:
         self.assertEqual(
             Metric('http_requests_total').filter(
                 job='prometheus',
@@ -14,7 +14,7 @@ class TestFilter(TestCase):
             'http_requests_total{job="prometheus", group="canary"}'
         )
 
-    def test_chain_filter(self):
+    def test_chain_filter(self) -> None:
         self.assertEqual(
             Metric('http_requests_total').filter(
                 job='prometheus',
@@ -24,7 +24,7 @@ class TestFilter(TestCase):
             'http_requests_total{job="prometheus", group="canary"}'
         )
 
-    def test_filter_will_not_modify_origin_metric(self):
+    def test_filter_will_not_modify_origin_metric(self) -> None:
         m = Metric('http_requests_total').filter(
             job='prometheus',
         )
@@ -44,7 +44,7 @@ class TestFilter(TestCase):
             'http_requests_total{job="prometheus"}'
         )
 
-    def test_regexp_filter(self):
+    def test_regexp_filter(self) -> None:
         self.assertEqual(
             Metric('http_requests_total').filter(
                 job=RegexpFilter('prometheus-.*'),
@@ -52,7 +52,7 @@ class TestFilter(TestCase):
             'http_requests_total{job=~"prometheus-.*"}'
         )
 
-    def test_not_equal_filter(self):
+    def test_not_equal_filter(self) -> None:
         self.assertEqual(
             Metric('http_requests_total').filter(
                 job=NotEqualFilter(''),

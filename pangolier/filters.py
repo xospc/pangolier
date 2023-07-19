@@ -1,27 +1,36 @@
+from typing import Union
+
+
 class FilterBase:
-    def __init__(self, expression):
+    expression: str
+
+    def __init__(self, expression: str):
         self.expression = expression
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         raise NotImplementedError
 
 
 class EqualFilter(FilterBase):
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         return '="%s"' % self.expression
 
 
 class NotEqualFilter(FilterBase):
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         return '!="%s"' % self.expression
 
 
 class RegexpFilter(FilterBase):
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         return '=~"%s"' % self.expression
 
 
-def _make_filter(value):
+FilterValueType = Union[str, FilterBase]
+FilterTuple = tuple[str, FilterBase]
+
+
+def _make_filter(value: FilterValueType) -> FilterBase:
     if isinstance(value, str):
         return EqualFilter(value)
 

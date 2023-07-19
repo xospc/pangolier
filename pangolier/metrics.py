@@ -1,38 +1,42 @@
+from typing import Optional
+
 from .common import indent_body, format_modifier
-from .filters import _make_filter
+from .filters import _make_filter, FilterValueType, FilterTuple
 
 
 class MetricBase:
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         raise NotImplementedError
 
-    def __add__(self, other):
+    def __add__(self, other: 'MetricBase') -> 'MetricBase':
         return BinOp('+', self, other)
 
-    def __sub__(self, other):
+    def __sub__(self, other: 'MetricBase') -> 'MetricBase':
         return BinOp('-', self, other)
 
-    def __mul__(self, other):
+    def __mul__(self, other: 'MetricBase') -> 'MetricBase':
         return BinOp('*', self, other)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: 'MetricBase') -> 'MetricBase':
         return BinOp('/', self, other)
 
-    def __mod__(self, other):
+    def __mod__(self, other: 'MetricBase') -> 'MetricBase':
         return BinOp('%', self, other)
 
-    def __xor__(self, other):
+    def __xor__(self, other: 'MetricBase') -> 'MetricBase':
         return BinOp('^', self, other)
 
 
 class Metric(MetricBase):
-    def __init__(self, name):
+    name: str
+
+    def __init__(self, name: str):
         self.name = name
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         return self.name
 
-    def filter(self, **kwargs):
+    def filter(self, **kwargs: FilterValueType) -> 'FilteredMetric':
         return FilteredMetric(self, [
             (k, _make_filter(v))
             for k, v in kwargs.items()
@@ -40,11 +44,14 @@ class Metric(MetricBase):
 
 
 class FilteredMetric(MetricBase):
-    def __init__(self, origin_metric, filters):
+    origin_metric: MetricBase
+    filters: list[FilterTuple]
+
+    def __init__(self, origin_metric: MetricBase, filters: list[FilterTuple]):
         self.origin_metric = origin_metric
         self.filters = filters
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         if not self.filters:
             return self.origin_metric.to_str(pretty=pretty)
 
@@ -64,7 +71,7 @@ class FilteredMetric(MetricBase):
             ', '.join(body_parts)
         )
 
-    def filter(self, **kwargs):
+    def filter(self, **kwargs: FilterValueType) -> 'FilteredMetric':
         append_filters = [
             (k, _make_filter(v))
             for k, v in kwargs.items()
@@ -78,11 +85,12 @@ class FilteredMetric(MetricBase):
 
 class GroupBase(MetricBase):
     modifier = ''
+    labels: list[str]
 
-    def __init__(self, *labels):
-        self.labels = labels
+    def __init__(self, *labels: str):
+        self.labels = list(labels)
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         return format_modifier(self.modifier, self.labels, pretty=pretty)
 
 
@@ -95,9 +103,23 @@ class GroupRight(GroupBase):
 
 
 class BinOp(MetricBase):
+    op: str
+    first: MetricBase
+    second: MetricBase
+
+    on: Optional[list[str]]
+    ignoring: Optional[list[str]]
+    group: Optional[GroupBase]
+
     def __init__(
-        self, op, first, second,
-        *, on=None, ignoring=None, group=None,
+        self,
+        op: str,
+        first: MetricBase,
+        second: MetricBase,
+        *,
+        on: Optional[list[str]] = None,
+        ignoring: Optional[list[str]] = None,
+        group: Optional[GroupBase] = None,
     ):
         if on and ignoring:
             raise ValueError('can not specific both `on` and `ignoring`')
@@ -110,7 +132,7 @@ class BinOp(MetricBase):
         self.ignoring = ignoring
         self.group = group
 
-    def to_str(self, pretty=False):
+    def to_str(self, pretty: bool = False) -> str:
         parts = []
 
         parts.append(self.first.to_str(pretty=pretty))

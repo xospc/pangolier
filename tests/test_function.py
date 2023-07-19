@@ -7,7 +7,7 @@ from pangolier.functions import (
 
 
 class TestFunction(TestCase):
-    def test_rate(self):
+    def test_rate(self) -> None:
         rate = range_function('rate')
 
         self.assertEqual(
@@ -15,7 +15,7 @@ class TestFunction(TestCase):
             'rate(http_requests_total[5m])'
         )
 
-    def test_increase(self):
+    def test_increase(self) -> None:
         increase = range_function('increase')
 
         self.assertEqual(
@@ -23,7 +23,7 @@ class TestFunction(TestCase):
             'increase(http_requests_total[5m])'
         )
 
-    def test_rate_with_filter(self):
+    def test_rate_with_filter(self) -> None:
         rate = range_function('rate')
 
         self.assertEqual(
@@ -37,7 +37,7 @@ class TestFunction(TestCase):
             'rate(http_requests_total{job="prometheus", group="canary"}[5m])'
         )
 
-    def test_sum(self):
+    def test_sum(self) -> None:
         sum_ = aggr('sum')
 
         self.assertEqual(
@@ -45,29 +45,29 @@ class TestFunction(TestCase):
             'sum(http_requests_total)'
         )
 
-    def test_sum_by(self):
+    def test_sum_by(self) -> None:
         sum_ = aggr('sum')
 
         self.assertEqual(
             sum_(
                 Metric('http_requests_total'),
-                by=('job', 'group'),
+                by=['job', 'group'],
             ).to_str(),
             'sum by(job, group)(http_requests_total)'
         )
 
-    def test_avg_without(self):
+    def test_avg_without(self) -> None:
         avg = aggr('avg')
 
         self.assertEqual(
             avg(
                 Metric('http_requests_total'),
-                without=('job', 'group'),
+                without=['job', 'group'],
             ).to_str(),
             'avg without(job, group)(http_requests_total)'
         )
 
-    def test_sum_by_rate(self):
+    def test_sum_by_rate(self) -> None:
         rate = range_function('rate')
         sum_ = aggr('sum')
 
@@ -77,12 +77,12 @@ class TestFunction(TestCase):
                     Metric('http_requests_total'),
                     timespan='5m'
                 ),
-                by=('job', 'group'),
+                by=['job', 'group'],
             ).to_str(),
             'sum by(job, group)(rate(http_requests_total[5m]))'
         )
 
-    def test_sum_by_rate_with_filter(self):
+    def test_sum_by_rate_with_filter(self) -> None:
         rate = range_function('rate')
         sum_ = aggr('sum')
 
@@ -94,12 +94,12 @@ class TestFunction(TestCase):
                     ),
                     timespan='5m'
                 ),
-                by=('group',)
+                by=['group']
             ).to_str(),
             'sum by(group)(rate(http_requests_total{job="prometheus"}[5m]))'  # noqa
         )
 
-    def test_histogram_quantile(self):
+    def test_histogram_quantile(self) -> None:
         histogram_quantile = function('histogram_quantile')
         rate = range_function('rate')
         sum_ = aggr('sum')
@@ -112,7 +112,7 @@ class TestFunction(TestCase):
                         Metric('http_request_duration_seconds_bucket'),
                         timespan='5m',
                     ),
-                    by=('le',)
+                    by=['le']
                 )
             ).to_str(),
             'histogram_quantile(0.9, sum by(le)(rate(http_request_duration_seconds_bucket[5m])))'  # noqa
