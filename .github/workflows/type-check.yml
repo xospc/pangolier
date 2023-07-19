@@ -25,12 +25,9 @@ jobs:
           --disallow-untyped-defs \
           --disallow-incomplete-defs \
           --check-untyped-defs \
-          --ignore-missing-imports \
-          --follow-imports silent \
           --disallow-any-generics \
           --no-implicit-optional \
           --warn-unused-ignores \
           --no-implicit-reexport \
-          --explicit-package-bases \
           --no-warn-no-return \
           .
