@@ -1,0 +1,36 @@
+name: type-check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip wheel setuptools
+        pip install mypy
+    - name: Run type check
+      run: |
+        mypy \
+          --disallow-untyped-defs \
+          --disallow-incomplete-defs \
+          --check-untyped-defs \
+          --ignore-missing-imports \
+          --follow-imports silent \
+          --disallow-any-generics \
+          --no-implicit-optional \
+          --warn-unused-ignores \
+          --no-implicit-reexport \
+          --explicit-package-bases \
+          --no-warn-no-return \
+          .
