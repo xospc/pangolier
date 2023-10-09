@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='pangolier',
-    version='0.2.0',
+    version='0.2.1',
     packages=find_packages(include=['pangolier']),
     package_data={
         'pangolier': ['py.typed'],
