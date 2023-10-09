@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Optional
 
 from .common import indent_body, format_modifier
@@ -5,6 +6,7 @@ from .filters import _make_filter, FilterValueType, FilterTuple
 
 
 class MetricBase:
+    @abstractmethod
     def to_str(self, pretty: bool = False) -> str:
         raise NotImplementedError
 
@@ -27,7 +29,13 @@ class MetricBase:
         return BinOp('^', self, other)
 
 
-class Metric(MetricBase):
+class FilterableMetricBase(MetricBase):
+    @abstractmethod
+    def filter(self, **kwargs: FilterValueType) -> 'FilteredMetric':
+        raise NotImplementedError
+
+
+class Metric(FilterableMetricBase):
     name: str
 
     def __init__(self, name: str):
@@ -43,7 +51,7 @@ class Metric(MetricBase):
         ])
 
 
-class FilteredMetric(MetricBase):
+class FilteredMetric(FilterableMetricBase):
     origin_metric: MetricBase
     filters: list[FilterTuple]
 
