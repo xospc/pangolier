@@ -19,13 +19,4 @@ jobs:
         python -m pip install mypy types-setuptools
     - name: Run type check
       run: |
-        mypy \
-          --disallow-untyped-defs \
-          --disallow-incomplete-defs \
-          --check-untyped-defs \
-          --disallow-any-generics \
-          --no-implicit-optional \
-          --warn-unused-ignores \
-          --no-implicit-reexport \
-          --no-warn-no-return \
-          .
+        mypy --strict .
