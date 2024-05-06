@@ -26,6 +26,11 @@ class RegexpFilter(FilterBase):
         return '=~"%s"' % self.expression
 
 
+class NotRegexpFilter(FilterBase):
+    def to_str(self, pretty: bool = False) -> str:
+        return '!~"%s"' % self.expression
+
+
 FilterValueType = Union[str, FilterBase]
 FilterTuple = tuple[str, FilterBase]
 
