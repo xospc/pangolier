@@ -2,7 +2,10 @@ from abc import abstractmethod
 from typing import Optional
 
 from .common import indent_body, format_modifier
-from .filters import _make_filter, FilterValueType, FilterTuple
+from .filters import (
+    make_filter_clause,
+    FilterValueType, FilterClause,
+)
 
 
 class MetricBase:
@@ -46,16 +49,19 @@ class Metric(FilterableMetricBase):
 
     def filter(self, **kwargs: FilterValueType) -> 'FilteredMetric':
         return FilteredMetric(self, [
-            (k, _make_filter(v))
+            make_filter_clause(k, v)
             for k, v in kwargs.items()
         ])
+
+    def where(self, *argv: FilterClause) -> 'FilteredMetric':
+        return FilteredMetric(self, list(argv))
 
 
 class FilteredMetric(FilterableMetricBase):
     origin_metric: MetricBase
-    filters: list[FilterTuple]
+    filters: list[FilterClause]
 
-    def __init__(self, origin_metric: MetricBase, filters: list[FilterTuple]):
+    def __init__(self, origin_metric: MetricBase, filters: list[FilterClause]):
         self.origin_metric = origin_metric
         self.filters = filters
 
@@ -64,8 +70,8 @@ class FilteredMetric(FilterableMetricBase):
             return self.origin_metric.to_str(pretty=pretty)
 
         body_parts = [
-            '%s%s' % (k, f.to_str(pretty=pretty))
-            for k, f in self.filters
+            f.to_str(pretty=pretty)
+            for f in self.filters
         ]
 
         if pretty:
@@ -81,7 +87,7 @@ class FilteredMetric(FilterableMetricBase):
 
     def filter(self, **kwargs: FilterValueType) -> 'FilteredMetric':
         append_filters = [
-            (k, _make_filter(v))
+            make_filter_clause(k, v)
             for k, v in kwargs.items()
         ]
 
@@ -89,6 +95,9 @@ class FilteredMetric(FilterableMetricBase):
             self.origin_metric,
             self.filters + append_filters
         )
+
+    def where(self, *argv: FilterClause) -> 'FilteredMetric':
+        return FilteredMetric(self, self.filters + list(argv))
 
 
 class GroupBase(MetricBase):

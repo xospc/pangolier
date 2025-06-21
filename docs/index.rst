@@ -27,6 +27,18 @@ For a metric with filters:
        group='canary'
    ).to_str())
 
+or with label style and method `where`:
+
+.. code-block:: python
+
+   from pangolier.metrics import Metric
+   from pangolier.label import Label
+
+   print(Metric('http_requests_total').where(
+        Label('job') == 'prometheus',
+        Label('group') == 'canary',
+   ).to_str())
+
 output:
 
 .. code-block::
