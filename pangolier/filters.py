@@ -1,34 +1,39 @@
-from typing import Union
+from dataclasses import dataclass
+from typing import Union, ClassVar
+
+
+@dataclass(frozen=True)
+class FilterClause:
+    label: str
+    op: str
+    expression: str
+
+    def to_str(self, pretty: bool = False) -> str:
+        return '%s%s"%s"' % (self.label, self.op, self.expression)
 
 
 class FilterBase:
+    op: ClassVar[str]
     expression: str
 
     def __init__(self, expression: str):
         self.expression = expression
 
-    def to_str(self, pretty: bool = False) -> str:
-        raise NotImplementedError
-
 
 class EqualFilter(FilterBase):
-    def to_str(self, pretty: bool = False) -> str:
-        return '="%s"' % self.expression
+    op = '='
 
 
 class NotEqualFilter(FilterBase):
-    def to_str(self, pretty: bool = False) -> str:
-        return '!="%s"' % self.expression
+    op = '!='
 
 
 class RegexpFilter(FilterBase):
-    def to_str(self, pretty: bool = False) -> str:
-        return '=~"%s"' % self.expression
+    op = '=~'
 
 
 class NotRegexpFilter(FilterBase):
-    def to_str(self, pretty: bool = False) -> str:
-        return '!~"%s"' % self.expression
+    op = '!~'
 
 
 FilterValueType = Union[str, FilterBase]
@@ -43,3 +48,8 @@ def _make_filter(value: FilterValueType) -> FilterBase:
         return value
 
     raise ValueError('cannot parse filter: %r' % value)
+
+
+def make_filter_clause(label: str, value: FilterValueType) -> FilterClause:
+    f = _make_filter(value)
+    return FilterClause(label, f.op, f.expression)

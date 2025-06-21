@@ -1,4 +1,4 @@
-from .filters import _make_filter, FilterValueType, FilterTuple
+from .filters import make_filter_clause, FilterValueType, FilterClause
 from .metrics import MetricBase, Metric, FilteredMetric
 
 
@@ -15,7 +15,7 @@ class MetricPrefix(PrefixBase):
 
     def filter(self, **kwargs: FilterValueType) -> 'FilteredMetricPrefix':
         return FilteredMetricPrefix(self, [
-            (k, _make_filter(v))
+            make_filter_clause(k, v)
             for k, v in kwargs.items()
         ])
 
@@ -27,19 +27,19 @@ class MetricPrefix(PrefixBase):
 
 class FilteredMetricPrefix(PrefixBase):
     origin_metric: MetricPrefix
-    filters: list[FilterTuple]
+    filters: list[FilterClause]
 
     def __init__(
         self,
         origin_metric: MetricPrefix,
-        filters: list[FilterTuple]
+        filters: list[FilterClause]
     ):
         self.origin_metric = origin_metric
         self.filters = filters
 
     def filter(self, **kwargs: FilterValueType) -> 'FilteredMetricPrefix':
         append_filters = [
-            (k, _make_filter(v))
+            make_filter_clause(k, v)
             for k, v in kwargs.items()
         ]
 
