@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='pangolier',
-    version='0.2.3',
+    version='0.2.4',
     packages=find_packages(include=['pangolier']),
     package_data={
         'pangolier': ['py.typed'],
@@ -19,6 +19,6 @@ setup(
 
     project_urls={
         'Documentation': 'https://pangolier.readthedocs.io',
-        'Source': 'https://github.com/lexdene/pangolier',
+        'Source': 'https://github.com/xospc/pangolier',
     },
 )
