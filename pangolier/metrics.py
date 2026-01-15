@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Callable
 from typing import Optional
 
 from .common import indent_body, format_modifier
@@ -8,28 +9,32 @@ from .filters import (
 )
 
 
+def _make_bin_op_method(operator: str) -> Callable[
+    ['MetricBase', 'MetricBase'], 'MetricBase'
+]:
+    def bin_op_method(self: 'MetricBase', other: 'MetricBase') -> 'MetricBase':
+        return BinOp(operator, self, other)
+
+    return bin_op_method
+
+
 class MetricBase:
     @abstractmethod
     def to_str(self, pretty: bool = False) -> str:
         raise NotImplementedError
 
-    def __add__(self, other: 'MetricBase') -> 'MetricBase':
-        return BinOp('+', self, other)
-
-    def __sub__(self, other: 'MetricBase') -> 'MetricBase':
-        return BinOp('-', self, other)
-
-    def __mul__(self, other: 'MetricBase') -> 'MetricBase':
-        return BinOp('*', self, other)
-
-    def __truediv__(self, other: 'MetricBase') -> 'MetricBase':
-        return BinOp('/', self, other)
-
-    def __mod__(self, other: 'MetricBase') -> 'MetricBase':
-        return BinOp('%', self, other)
-
-    def __xor__(self, other: 'MetricBase') -> 'MetricBase':
-        return BinOp('^', self, other)
+    __add__ = _make_bin_op_method('+')
+    __sub__ = _make_bin_op_method('-')
+    __mul__ = _make_bin_op_method('*')
+    __truediv__ = _make_bin_op_method('/')
+    __mod__ = _make_bin_op_method('%')
+    __xor__ = _make_bin_op_method('^')
+    __lt__ = _make_bin_op_method('<')
+    __le__ = _make_bin_op_method('<=')
+    __gt__ = _make_bin_op_method('>')
+    __ge__ = _make_bin_op_method('>=')
+    __eq__ = _make_bin_op_method('=')  # type: ignore[assignment]
+    __ne__ = _make_bin_op_method('!=')  # type: ignore[assignment]
 
 
 class FilterableMetricBase(MetricBase):
