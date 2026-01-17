@@ -117,3 +117,17 @@ class TestFunction(TestCase):
             ).to_str(),
             'histogram_quantile(0.9, sum by(le)(rate(http_request_duration_seconds_bucket[5m])))'  # noqa
         )
+
+    def test_label_replace(self) -> None:
+        label_replace = function('label_replace')
+
+        self.assertEqual(
+            label_replace(
+                Metric('foo'),
+                'bar',
+                '$1',
+                'service',
+                '(.*):.*',
+            ).to_str(),
+            'label_replace(foo, "bar", "$1", "service", "(.*):.*")',
+        )

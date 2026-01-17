@@ -14,6 +14,9 @@ def _format_arg(arg: ArgType, pretty: bool = False) -> str:
     if isinstance(arg, MetricBase):
         return arg.to_str(pretty=pretty)
 
+    if isinstance(arg, str):
+        return '"%s"' % arg
+
     return str(arg)
 
 
