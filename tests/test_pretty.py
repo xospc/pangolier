@@ -1,10 +1,14 @@
 from textwrap import dedent
+from functools import reduce
 from unittest import TestCase
 
-from pangolier.metrics import MetricBase, Metric, BinOp, GroupLeft
+from pangolier.metrics import MetricBase, Metric
+from pangolier.bin_op import BinOp, GroupLeft
 from pangolier.functions import (
     function, range_function, aggregation_operator as aggr,
 )
+
+from .utils import make_multiply_func
 
 
 class TestPretty(TestCase):
@@ -263,5 +267,47 @@ class TestPretty(TestCase):
                 ) group_left(
                     node, resource
                 ) bar
+            ''',
+        )
+
+    def test_group_with_precedence(self) -> None:
+        self._assert_pretty_equal(
+            reduce(
+                make_multiply_func(on=['name'], group=GroupLeft()),
+                [
+                    Metric('foo'),
+                    Metric('bar') > Metric('0'),
+                    Metric('qux'),
+                ]
+            ),
+            '''
+                foo * on(
+                    name
+                ) group_left() (
+                    bar > 0
+                ) * on(
+                    name
+                ) group_left qux
+            ''',
+        )
+
+    def test_group_with_precedence_another(self) -> None:
+        self._assert_pretty_equal(
+            reduce(
+                make_multiply_func(on=['name'], group=GroupLeft()),
+                [
+                    Metric('bar') > Metric('0'),
+                    Metric('foo'),
+                    Metric('qux'),
+                ]
+            ),
+            '''
+                (
+                    bar > 0
+                ) * on(
+                    name
+                ) group_left foo * on(
+                    name
+                ) group_left qux
             ''',
         )
