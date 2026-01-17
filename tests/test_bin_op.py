@@ -1,7 +1,12 @@
+from functools import reduce
+
 from unittest import TestCase
 
-from pangolier.metrics import MetricBase, Metric, BinOp, GroupLeft, GroupRight
+from pangolier.metrics import MetricBase, Metric
+from pangolier.bin_op import BinOp, GroupLeft, GroupRight
 from pangolier.functions import range_function
+
+from .utils import make_multiply_func
 
 
 class TestBinOp(TestCase):
@@ -51,6 +56,12 @@ class TestBinOp(TestCase):
         self._assert_metric_str(
             Metric('foo') - Metric('bar') / Metric('biz'),
             'foo - bar / biz'
+        )
+
+    def test_precedence(self) -> None:
+        self._assert_metric_str(
+            Metric('foo') * (Metric('bar') > Metric('0')) * Metric('qux'),
+            'foo * (bar > 0) * qux',
         )
 
     def test_filters(self) -> None:
@@ -157,4 +168,45 @@ class TestBinOp(TestCase):
                 group=GroupLeft('node', 'resource'),
             ),
             'foo * on(interface, job) group_left(node, resource) bar',
+        )
+
+    def test_group_with_precedence(self) -> None:
+        self._assert_metric_str(
+            reduce(
+                make_multiply_func(on=['name'], group=GroupLeft()),
+                [
+                    Metric('foo'),
+                    Metric('bar') > Metric('0'),
+                    Metric('qux'),
+                ]
+            ),
+            'foo * on(name) group_left() (bar > 0) * on(name) group_left qux',
+        )
+
+    def test_group_with_precedence_another(self) -> None:
+        self._assert_metric_str(
+            reduce(
+                make_multiply_func(on=['name'], group=GroupLeft()),
+                [
+                    Metric('bar') > Metric('0'),
+                    Metric('foo'),
+                    Metric('qux'),
+                ]
+            ),
+            '(bar > 0) * on(name) group_left foo * on(name) group_left qux',
+        )
+
+    def test_group_with_precedence_reverse(self) -> None:
+        self._assert_metric_str(
+            reduce(
+                make_multiply_func(
+                    on=['name'], group=GroupLeft(), reverse=True,
+                ),
+                [
+                    Metric('qux'),
+                    Metric('bar') > Metric('0'),
+                    Metric('foo'),
+                ]
+            ),
+            'foo * on(name) group_left() (bar > 0) * on(name) group_left qux',
         )

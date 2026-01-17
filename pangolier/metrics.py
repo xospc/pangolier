@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Optional
 
-from .common import indent_body, format_modifier
+from .common import indent_body
 from .filters import (
     make_filter_clause,
     FilterValueType, FilterClause,
@@ -13,6 +12,8 @@ def _make_bin_op_method(operator: str) -> Callable[
     ['MetricBase', 'MetricBase'], 'MetricBase'
 ]:
     def bin_op_method(self: 'MetricBase', other: 'MetricBase') -> 'MetricBase':
+        from .bin_op import BinOp
+
         return BinOp(operator, self, other)
 
     return bin_op_method
@@ -103,76 +104,3 @@ class FilteredMetric(FilterableMetricBase):
 
     def where(self, *argv: FilterClause) -> 'FilteredMetric':
         return FilteredMetric(self, self.filters + list(argv))
-
-
-class GroupBase(MetricBase):
-    modifier = ''
-    labels: list[str]
-
-    def __init__(self, *labels: str):
-        self.labels = list(labels)
-
-    def to_str(self, pretty: bool = False) -> str:
-        return format_modifier(self.modifier, self.labels, pretty=pretty)
-
-
-class GroupLeft(GroupBase):
-    modifier = 'group_left'
-
-
-class GroupRight(GroupBase):
-    modifier = 'group_right'
-
-
-class BinOp(MetricBase):
-    op: str
-    first: MetricBase
-    second: MetricBase
-
-    on: Optional[list[str]]
-    ignoring: Optional[list[str]]
-    group: Optional[GroupBase]
-
-    def __init__(
-        self,
-        op: str,
-        first: MetricBase,
-        second: MetricBase,
-        *,
-        on: Optional[list[str]] = None,
-        ignoring: Optional[list[str]] = None,
-        group: Optional[GroupBase] = None,
-    ):
-        if on and ignoring:
-            raise ValueError('can not specific both `on` and `ignoring`')
-
-        self.op = op
-        self.first = first
-        self.second = second
-
-        self.on = on
-        self.ignoring = ignoring
-        self.group = group
-
-    def to_str(self, pretty: bool = False) -> str:
-        parts = []
-
-        parts.append(self.first.to_str(pretty=pretty))
-        parts.append(self.op)
-
-        if self.on:
-            parts.append(
-                format_modifier('on', self.on, pretty=pretty)
-            )
-
-        if self.ignoring:
-            parts.append(
-                format_modifier('ignoring', self.ignoring, pretty=pretty)
-            )
-
-        if self.group:
-            parts.append(self.group.to_str(pretty=pretty))
-
-        parts.append(self.second.to_str(pretty=pretty))
-
-        return ' '.join(parts)
