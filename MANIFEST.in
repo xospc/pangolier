@@ -1,0 +1,8 @@
+exclude .gitignore
+exclude .readthedocs.yaml
+exclude .flake8
+exclude MANIFEST.in
+
+prune .github
+prune docs
+prune tests
