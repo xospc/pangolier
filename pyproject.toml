@@ -1,0 +1,29 @@
+[project]
+name = "pangolier"
+description = "build PromQL by Python code"
+
+authors = [
+    { name = "Elephant Liu" }
+]
+
+license = "MIT"
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
+
+requires-python = ">=3.10"
+
+readme = "README.md"
+
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://pangolier.readthedocs.io"
+Source = "https://github.com/xospc/pangolier"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
