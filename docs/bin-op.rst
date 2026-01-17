@@ -3,12 +3,23 @@ binary operators
 
 support following binary operators:
 
+Arithmetic binary operators:
+
 * ``+`` (addition)
 * ``-`` (subtraction)
 * ``*`` (multiplication)
 * ``/`` (division)
 * ``%`` (modulo)
 * ``^`` (power/exponentiation)
+
+Comparison binary operators
+
+* ``==`` (equal)
+* ``!=`` (not-equal)
+* ``>`` (greater-than)
+* ``<`` (less-than)
+* ``>=`` (greater-or-equal)
+* ``<=`` (less-or-equal)
 
 For example, divide one metric with another:
 
@@ -50,7 +61,8 @@ For operation with modifier:
 
 .. code-block:: python
 
-   from pangolier.metrics import Metric, BinOp, GroupLeft
+   from pangolier.metrics import Metric
+   from pangolier.bin_op import BinOp, GroupLeft
 
    print(BinOp(
        '*',
