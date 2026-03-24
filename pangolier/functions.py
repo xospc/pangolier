@@ -1,9 +1,10 @@
+from decimal import Decimal
 from typing import Union
 
 from .common import indent_body
 from .metrics import MetricBase
 
-ArgType = Union[int, float, str, MetricBase]
+ArgType = Union[int, float, str, Decimal, MetricBase]
 
 
 class FunctionBase(MetricBase):
