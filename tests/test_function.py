@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest import TestCase
 
 from pangolier.metrics import Metric
@@ -116,6 +117,25 @@ class TestFunction(TestCase):
                 )
             ).to_str(),
             'histogram_quantile(0.9, sum by(le)(rate(http_request_duration_seconds_bucket[5m])))'  # noqa
+        )
+
+    def test_histogram_quantile_with_decimal(self) -> None:
+        histogram_quantile = function('histogram_quantile')
+        rate = range_function('rate')
+        sum_ = aggr('sum')
+
+        self.assertEqual(
+            histogram_quantile(
+                Decimal('0.99'),
+                sum_(
+                    rate(
+                        Metric('http_request_duration_seconds_bucket'),
+                        timespan='5m',
+                    ),
+                    by=['le']
+                )
+            ).to_str(),
+            'histogram_quantile(0.99, sum by(le)(rate(http_request_duration_seconds_bucket[5m])))'  # noqa
         )
 
     def test_label_replace(self) -> None:
