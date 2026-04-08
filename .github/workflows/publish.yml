@@ -6,15 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           # include git history for setuptools-scm
           fetch-depth: 20
           fetch-tags: true
-
-          # work around a bug of checkout
-          # https://github.com/actions/checkout/issues/1467
-          ref: ${{ github.ref }}
       - name: Set up Python
         uses: actions/setup-python@v3
       - name: build
