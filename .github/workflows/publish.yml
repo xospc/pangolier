@@ -20,12 +20,11 @@ jobs:
       - name: build
         run: |
           python -m pip install build
-          python -m build
+          python -m build --wheel
       - name: dump result
         run: |
           ls -alh dist/
           find dist -name *.whl -print -exec unzip -l {} \;
-          find dist -name *.tar.gz -print -exec tar -ztvf {} \;
       - uses: actions/upload-artifact@v4
         with:
           name: dist
